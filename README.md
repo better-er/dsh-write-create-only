@@ -16,13 +16,19 @@
 
 ## 安装
 
+**从 GitHub 安装**：源码在 `src/`，`lib/` 不入仓库，安装时 npm 会触发 `prepare` 脚本现场构建。
+
 ```powershell
 dsh plugin --profile web add github:better-er/dsh-write-create-only
 ```
 
-或安装 npm 发布的版本：`dsh plugin --profile web add dsh-write-create-only`。
+**从 npm 安装**：包内已含构建产物 `lib/index.js`，安装时不再构建。
 
-装完即自动挂载，重启 DSH web 后启用，无需手工编辑组合文件。
+```powershell
+dsh plugin --profile web add dsh-write-create-only
+```
+
+两种方式装完都会自动挂载，重启 DSH web 后启用，无需手工编辑组合文件。
 
 ## 卸载
 

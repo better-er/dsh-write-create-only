@@ -35,6 +35,7 @@
     }
   },
   "scripts": {
+    "prepare": "node build.mjs",
     "build": "node build.mjs",
     "watch": "node build.mjs --watch"
   },
