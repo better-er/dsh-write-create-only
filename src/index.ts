@@ -1,17 +1,12 @@
 /**
  * dsh-write-create-only — 禁止 write 覆盖已存在文件。
  *
- * 唯一职责：在工具真正执行前的 tools/pre-execute 瀑布里拦下 write 调用，
- * 先 stat 目标文件——若已存在则返回 { kind: 'deny' } 直接拒绝，并提示模型
- * 改用 edit 做定向修改；目标不存在则放行，write 照常创建新文件。
+ * 唯一职责：在工具真正执行前的 tools/pre-execute 瀑布里拦下 write 调用，先 stat 目标文件——若已存在则返回 { kind: 'deny' } 直接拒绝，并提示模型改用 edit 做定向修改；目标不存在则放行，write 照常创建新文件。
  *
- * 为什么要拦而不是依赖工具本身：write 是全文件覆写，误用来改已有文件会把
- * 原内容整个冲掉，且 fs-observation-policy 只要求「先读过」并不禁止覆写。
+ * 为什么要拦而不是依赖工具本身：write 是全文件覆写，误用来改已有文件会把原内容整个冲掉，且 fs-observation-policy 只要求「先读过」并不禁止覆写。
  * 本插件把「write = 仅创建」立成硬约束，全局所有会话生效。
  *
- * 实现选型：tools/pre-execute 是异步瀑布，可安全 await ctx.fs.stat；它发生在
- * 工具执行的最前面，不与 fs/write-intent 那个单槽抢位，它已被 fs-observation-policy
- * 占用，也不会改动 write 工具的 schema 与执行体。
+ * 实现选型：tools/pre-execute 是异步瀑布，可安全 await ctx.fs.stat；它发生在工具执行的最前面，不与 fs/write-intent 那个单槽抢位，它已被 fs-observation-policy 占用，也不会改动 write 工具的 schema 与执行体。
  */
 
 /** 插件名，与 cordis.patch.yml 的 name 一致，loader 诊断用。 */
@@ -27,7 +22,7 @@ const FILE_PATH_KEY = 'file_path'
 type TargetState = 'exists' | 'absent' | 'unknown'
 
 /**
- * 目标是否已存在。resolve 用会话工作目录，与 write 工具实际写入的路径保持一致；
+ * 目标是否已存在。resolve 用会话工作目录，与 write 工具实际写入的路径保持一致。
  * 任何异常，包括无效路径、stat 失败等，都返回 'unknown'，由调用方保守放行，避免误伤。
  */
 async function targetState(

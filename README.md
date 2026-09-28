@@ -28,7 +28,7 @@ dsh plugin --profile web add github:better-er/dsh-write-create-only
 dsh plugin --profile web add dsh-write-create-only
 ```
 
-两种方式装完都会自动挂载，重启 DSH web 后启用，无需手工编辑组合文件。
+两种方式装完都会自动挂载，重启 DSH web 后启用，无需手工编辑任何文件。
 
 ## 卸载
 
@@ -36,7 +36,7 @@ dsh plugin --profile web add dsh-write-create-only
 dsh plugin --profile web remove dsh-write-create-only
 ```
 
-重启 DSH web 后不再加载。
+彻底移除，重启 DSH web 后不再加载。
 
 ## 原理
 
