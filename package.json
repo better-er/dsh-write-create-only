@@ -1,7 +1,11 @@
 {
   "name": "dsh-write-create-only",
-  "version": "0.1.0",
-  "description": "禁止 write 覆盖已存在的文件：write 只允许创建新文件，目标已存在时在工具执行前直接拒绝并提示改用 edit，全局所有会话生效，防止模型用 write 整体覆写已有内容。纯 host 端 dsh 插件。",
+  "version": "0.1.1",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=26.3.1"
+  },
+  "description": "「DSH·write 仅创建」：write 只允许创建新文件，目标已存在时在工具执行前直接拒绝并提示改用 edit，全局所有会话生效，防止模型用 write 整体覆写已有内容。纯 host 端 dsh 插件。",
   "keywords": [
     "deepseek-harness",
     "dsh",
@@ -37,9 +41,16 @@
   "scripts": {
     "prepare": "node build.mjs",
     "build": "node build.mjs",
-    "watch": "node build.mjs --watch"
+    "watch": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh": "^0.1.7-rc.2"
   },
   "devDependencies": {
-    "esbuild": "^0.25.0"
+    "@types/node": "^26.3.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.3"
   }
 }

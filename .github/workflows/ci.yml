@@ -1,8 +1,8 @@
 name: CI
 
-# 每次 push 到 main、以及任何 PR 包括来自 fork 的 PR 都自动跑完整检查。
-# 本插件是 TS 源码 + esbuild 构建，lib/index.js 才是发布产物，
-# 因此 CI = 安装依赖 → 构建 → 语法检查 → 冒烟测试 → 产物齐全校验，全绿才允许合并。
+# 每次 push 到主分支、任何 PR 包括来自 fork 的 PR 都自动跑完整检查。
+# 本插件是构建型：src/ 是源码，lib/ 是产物且不入库，因此 CI 必须装依赖再构建。
+# PR 检查即门禁：typecheck / build / smoke / 产物校验全绿才允许合并。
 on:
   push:
     branches:
@@ -12,46 +12,49 @@ on:
     branches:
       - main
 
-# 同一分支/PR 上排队的新提交会取消正在跑的旧任务，避免资源浪费。
+# 同一分支或 PR 上排队的新提交会取消正在跑的旧任务，避免资源浪费。
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-check:
-    name: 构建 · 检查 · 冒烟
+  check:
+    name: typecheck · build · smoke
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # 本地与线上主推的运行时，两个版本都验证一次。
-        node:
-          - 22
-          - 26
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          # 版本必须与 package.json 的 packageManager 完全一致，否则 action-setup 会报 Multiple versions of pnpm specified。
+          version: 9.15.9
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
-          cache: npm
+          # 与本地 node -v 锁死同一版本，见工作区 AGENTS.md 的 Node 版本约定。
+          node-version: 26.3.1
+          cache: pnpm
 
-      - name: 安装依赖
-        run: npm install
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: 构建 lib/index.js
-        run: npm run build
+      - name: Typecheck
+        run: pnpm typecheck
 
-      - name: 语法检查
-        run: node --check lib/index.js
+      - name: Build
+        run: pnpm build
 
-      - name: 冒烟测试
-        run: node scripts/smoke.mjs
+      # 冒烟脚本用真实的 pre-execute 瀑布验证拦截与放行两条路径。
+      - name: Smoke
+        run: pnpm smoke
 
-      - name: 产物齐全性校验
+      # 纯 host 半身，产物缺失会在此失败。
+      - name: Verify build outputs
         run: |
           test -f lib/index.js
+          test -f lib/index.js.map
           test -f cordis.patch.yml
-          test -f package.json
-          echo "发布产物齐全：lib/index.js · cordis.patch.yml · package.json"
+          echo "构建产物齐全：lib/index.js · lib/index.js.map · cordis.patch.yml"
