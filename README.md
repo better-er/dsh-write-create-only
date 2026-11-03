@@ -70,3 +70,5 @@ node scripts/smoke.mjs   # 无运行时冒烟验证：5 项断言覆盖拦截/�
 ## License
 
 [MIT](./LICENSE)
+
+[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness)
